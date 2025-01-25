@@ -1,121 +1,63 @@
 'use client'
 
-// React/Next
-import Link from 'next/link'
-
 // Components
-import { Flex, Heading, Text, Divider, Icon, Card } from '@/components/UI'
+import { Flex, Heading, Divider, Card, Button } from '@/components/UI'
 import Container from '@/components/Layout/Container'
-import {
-  PantheonIcon,
-  SharedWalletIcon,
-  CartIcon,
-  MinerIcon,
-  StarIcon
-} from '@bitcoin-design/bitcoin-icons-react/filled'
-
-import packageJson from '../../package.json'
+import Input from '@/components/UI/Input'
+import { useCallback, useState } from 'react'
+import { fetchLNURL, validateEmail } from '@/lib/utils'
+import { BtnLoader } from '@/components/Loader/Loader'
+import { useRouter } from 'next/navigation'
 
 export default function Page() {
+  const router = useRouter()
+  const [destination, setDestination] = useState<string>('')
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const handleSetDestination = useCallback(async () => {
+    if (isLoading) {
+      return
+    }
+    setIsLoading(true)
+
+    try {
+      await fetchLNURL(destination)
+      router.push(`/${destination}`)
+    } catch (e) {
+      setIsLoading(false)
+      alert((e as Error).message)
+    }
+  }, [destination, router, isLoading])
+
   return (
     <>
       <Container size="small">
-        <Divider y={24} />
         <Flex direction="column" gap={8} flex={1} justify="center">
-          <Heading as="h4">Selecciona un modo (v{packageJson.version})</Heading>
+          <Heading as="h4">Custom POS (v0.2.1)</Heading>
           <Flex gap={8}>
             <Card>
-              <Link href="/cart/mixed">
-                <Icon>
-                  <CartIcon />
-                </Icon>
-                <Flex direction="column" gap={4}>
-                  <Heading as="h5">Panchitos</Heading>
-                  <Text size="small">Todo el menú</Text>
+              <Divider y={12} />
+              <Flex gap={16} direction="column" flex={1} justify="center">
+                <Heading as="h5">Destinatario</Heading>
+                <Input
+                  value={destination}
+                  disabled={isLoading}
+                  onChange={e => setDestination(e.target.value)}
+                  placeholder="usuario@lawallet.ar"
+                />
+                <Flex direction="row">
+                  <Button
+                    disabled={!validateEmail(destination)}
+                    variant="bezeledGray"
+                    onClick={handleSetDestination}
+                  >
+                    {isLoading ? <BtnLoader /> : 'Configurar'}
+                  </Button>
                 </Flex>
-              </Link>
-            </Card>
-            {/* <Card>
-              <Link href="/cart/comida">
-                <Icon>
-                  <CartIcon />
-                </Icon>
-                <Flex direction="column" gap={4}>
-                  <Heading as="h5">Comida</Heading>
-                  <Text size="small">Comida</Text>
-                </Flex>
-              </Link>
-            </Card> */}
-          </Flex>
-
-          <Flex gap={8}>
-            <Card>
-              <Link href="/paydesk">
-                <Icon>
-                  <PantheonIcon />
-                </Icon>
-                <Flex direction="column" gap={4}>
-                  <Heading as="h5">Caja</Heading>
-                  <Text size="small">Medio de cobro para tu negocio.</Text>
-                </Flex>
-              </Link>
-            </Card>
-            <Card color="secondary">
-              <Link href="/tree">
-                <Icon>
-                  <SharedWalletIcon />
-                </Icon>
-                <Flex direction="column" gap={4}>
-                  <Heading as="h5">Arbolito</Heading>
-                  <Text size="small">
-                    Transferi dinero de una tarjeta a otra.
-                  </Text>
-                </Flex>
-              </Link>
-            </Card>
-          </Flex>
-
-          <Flex gap={8}>
-            <Card>
-              <Link href="/cart/merch">
-                <Icon>
-                  <CartIcon />
-                </Icon>
-                <Flex direction="column" gap={4}>
-                  <Heading as="h5">Merch</Heading>
-                  <Text size="small">Merchandising</Text>
-                </Flex>
-              </Link>
-            </Card>
-          </Flex>
-
-          <Flex gap={8}>
-            <Card color="error">
-              <Link href="/admin">
-                <Icon>
-                  <MinerIcon />
-                </Icon>
-                <Flex direction="column" gap={4}>
-                  <Heading as="h5">Admin</Heading>
-                  <Text size="small">Admin de tarjetas.</Text>
-                </Flex>
-              </Link>
-            </Card>
-
-            <Card color="error">
-              <Link href="/extract">
-                <Icon>
-                  <MinerIcon />
-                </Icon>
-                <Flex direction="column" gap={4}>
-                  <Heading as="h5">Extract</Heading>
-                  <Text size="small">Extract.</Text>
-                </Flex>
-              </Link>
+              </Flex>
             </Card>
           </Flex>
         </Flex>
-        <Divider y={24} />
       </Container>
     </>
   )
