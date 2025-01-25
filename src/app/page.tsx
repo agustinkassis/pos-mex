@@ -39,7 +39,6 @@ export default function Page() {
               <Divider y={12} />
               <Flex gap={16} direction="column" flex={1} justify="center">
                 <Heading as="h5">Destinatario</Heading>
-
                 <Input
                   value={destination}
                   disabled={isLoading}
